@@ -344,7 +344,7 @@
         </div>
         <h2 class="text-sm font-bold text-white mb-1">Безоценочный архив Just Tanya: YouTube + ⭐ Boosty</h2>
         <p class="text-slate-300 leading-relaxed mb-3 text-[11px]">
-          Полная интерактивная карта выпусков канала <strong class="text-white">Татьяны (@just_tanya1)</strong>: <strong>100 публичных выпусков YouTube</strong> и <strong>140 эксклюзивных выпусков Boosty</strong>. Приложение не выставляет салонам субъективных баллов — только факты, таймкоды и прямые ссылки на ролики.
+          Полная интерактивная карта выпусков <strong class="text-white">Just Tanya (ТГ-канал: @just_tanya_channel)</strong>: <strong>100 публичных выпусков YouTube</strong> и <strong>140 эксклюзивных выпусков Boosty</strong>. Приложение не выставляет салонам субъективных баллов — только факты, таймкоды и прямые ссылки на ролики.
         </p>
         <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t border-slate-800">
           <div class="bg-slate-950 p-2 rounded-xl border border-slate-800">
@@ -392,9 +392,9 @@
             <span>📨</span>
             <span>Предложить салон / Оставить отзыв</span>
           </button>
-          <a id="aboutCommunityLink" href="https://t.me/just_tanya1" target="_blank" rel="noopener noreferrer" onclick="return window.openFeedbackCommunity(event);" class="w-full py-2.5 bg-slate-950 hover:bg-slate-800 text-amber-200 border border-amber-600/50 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm active:scale-95 transition-all">
+          <a id="aboutCommunityLink" href="https://t.me/just_tanya_channel" target="_blank" rel="noopener noreferrer" onclick="return window.openFeedbackCommunity(event);" class="w-full py-2.5 bg-slate-950 hover:bg-slate-800 text-amber-200 border border-amber-600/50 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm active:scale-95 transition-all">
             <span>👥</span>
-            <span>Группа обсуждений и обновлений карты</span>
+            <span>Telegram-канал Just Tanya (@just_tanya_channel)</span>
           </a>
         </div>
         <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
@@ -16233,7 +16233,7 @@
       mainBotToken: '9087119961:AAFxyxHZ2S6bZ7q8QZALTwrGE4YDy5rt-kQ',
       feedbackBotToken: '9159079478:AAFMJ1HhS8d1YUXhZzi7nMkrkORtdBamEGw',
       adminChatId: '5495561258',
-      feedbackGroupUrl: 'https://t.me/reessentiment',
+      feedbackGroupUrl: 'https://t.me/just_tanya_channel',
       developerContactUrl: 'https://t.me/reessentiment',
       n8nWebhookUrl: 'http://95.182.89.35:5678/webhook/just-tanya-tma'
     };
@@ -17405,7 +17405,7 @@
 
     window.openFeedbackCommunity = function(e) {
       if (e) e.preventDefault();
-      const url = APP_CONFIG.feedbackGroupUrl || 'https://t.me/just_tanya1';
+      const url = APP_CONFIG.feedbackGroupUrl || 'https://t.me/just_tanya_channel';
       if (window.Telegram?.WebApp?.openTelegramLink && url.includes('t.me/')) {
         window.Telegram.WebApp.openTelegramLink(url);
       } else {
@@ -17452,6 +17452,106 @@
         window.open(botRubLink, '_blank', 'noopener,noreferrer');
       }
     };
+
+    
+    function applyDynamicSalonsList(dynList) {
+      if (!Array.isArray(dynList) || dynList.length === 0) return;
+      let added = 0;
+      for (let i = dynList.length - 1; i >= 0; i--) {
+        const item = dynList[i];
+        if (!item || !item.id) continue;
+        const existingIdx = SALONS_DATA.findIndex(s => s.id === item.id);
+        const catLower = (item.c || "").toLowerCase();
+        let catGroup = "other";
+        if (catLower.includes("маникюр") || catLower.includes("педикюр") || catLower.includes("ногт")) catGroup = "nails";
+        else if (catLower.includes("макияж") || catLower.includes("визаж")) catGroup = "makeup";
+        else if (catLower.includes("укладк") || catLower.includes("волос") || catLower.includes("стрижк")) catGroup = "hair";
+        else if (catLower.includes("бров") || catLower.includes("ресниц") || catLower.includes("косметолог") || catLower.includes("лазер") || catLower.includes("массаж")) catGroup = "brows_cosmo";
+
+        const fullObj = {
+          id: item.id,
+          name: item.n || item.t || "Новый салон",
+          shortName: item.sn || `🔥 Выпуск #${item.id}`,
+          category: item.c || "Обзор салона",
+          categoryGroup: catGroup,
+          categoryIcon: item.i || "💄",
+          pinLabel: item.c || "Новый выпуск",
+          district: item.d || "Санкт-Петербург",
+          address: item.a || "г. Санкт-Петербург",
+          addressPrecision: "[НОВЫЙ ВЫПУСК]",
+          addressQuote: item.a || "Добавлено автопарсером",
+          lat: Number(item.lat) || 59.9354,
+          lng: Number(item.lng) || 30.3271,
+          price: item.p || "Новый обзор",
+          isBoosty: Boolean(item.b),
+          videoUrl: item.b ? "" : (item.u || "https://www.youtube.com/@just_tanya1/videos"),
+          boostyUrl: item.b ? (item.u || "https://boosty.to/just_tanya1") : "",
+          videoTitle: item.t || item.n || "Новый обзор Just Tanya",
+          summary: item.s || `Свежий выпуск на канале Just Tanya: «${item.t || item.n}».`,
+          salonResponse: "Добавлено через автопарсер Бьюти-Карты.",
+          criteriaComments: {
+            quality: item.s || `Свежий обзор салона «${item.n}» (${item.c}).`,
+            sanpin: "Проверка чистоты, инструментов и соблюдения СанПиН в полном выпуске.",
+            service: "Работа мастера и сервис разобраны в видео.",
+            management: "Реакция администратора и руководства зафиксирована на видео.",
+            value: `Стоимость услуги: ${item.p || "см. в выпуске"}.`
+          },
+          timeline: [
+            { time: "00:00", title: "Начало визита и встреча в салоне", desc: "Оценка ресепшена и сервиса" },
+            { time: "05:00", title: "Проверка чистоты и СанПиН", desc: "Осмотр инструментов и сроков годности" },
+            { time: "12:00", title: "Процесс выполнения услуги", desc: "Работа мастера и соблюдение технологии" },
+            { time: "20:00", title: "Итог визита и вердикт Тани", desc: "Финальный результат и выводы" }
+          ],
+          violations: [item.s || "См. полный видеообзор по ссылке"]
+        };
+
+        if (existingIdx !== -1) {
+          SALONS_DATA[existingIdx] = fullObj;
+        } else {
+          SALONS_DATA.unshift(fullObj);
+          added++;
+        }
+      }
+      if (added > 0 || dynList.length > 0) {
+        const total = SALONS_DATA.length;
+        const ytTotal = SALONS_DATA.filter(s => !s.isBoosty).length;
+        const boostyTotal = SALONS_DATA.filter(s => s.isBoosty).length;
+        const btnAll = document.querySelector('[data-filter-source="all"]');
+        const btnYt = document.querySelector('[data-filter-source="youtube"]');
+        const btnBo = document.querySelector('[data-filter-source="boosty"]');
+        if (btnAll) btnAll.textContent = `Все (${total})`;
+        if (btnYt) btnYt.textContent = `▶ YouTube (${ytTotal})`;
+        if (btnBo) btnBo.textContent = `⭐ Boosty (${boostyTotal})`;
+        renderViews();
+      }
+    }
+
+    async function syncDynamicSalonsFromTelegram() {
+      try {
+        const cached = localStorage.getItem("jt_dynamic_salons_cache_v1");
+        if (cached) {
+          applyDynamicSalonsList(JSON.parse(cached));
+        }
+      } catch(e) {}
+
+      for (const token of [APP_CONFIG.mainBotToken, APP_CONFIG.feedbackBotToken]) {
+        if (!token || !APP_CONFIG.adminChatId) continue;
+        try {
+          const r = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=${APP_CONFIG.adminChatId}`);
+          const j = await r.json();
+          const pinText = j?.result?.pinned_message?.text || "";
+          const m = pinText.match(/\[JT_DYNAMIC_SALONS_JSON\]([\s\S]*?)\[\/JT_DYNAMIC_SALONS_JSON\]/);
+          if (m && m[1]) {
+            const parsed = JSON.parse(m[1].trim());
+            if (Array.isArray(parsed)) {
+              try { localStorage.setItem("jt_dynamic_salons_cache_v1", JSON.stringify(parsed)); } catch(e) {}
+              applyDynamicSalonsList(parsed);
+              return;
+            }
+          }
+        } catch(e) {}
+      }
+    }
 
     async function resolveSharedGroupChatId() {
       if (APP_CONFIG.kassaGroupChatId && String(APP_CONFIG.kassaGroupChatId).startsWith('-')) {
@@ -17788,6 +17888,7 @@
       } catch(e) {}
 
       resolveSharedGroupChatId().catch(() => {});
+      syncDynamicSalonsFromTelegram().catch(() => {});
       initMap();
       renderViews();
       updateHeaderBalances();
